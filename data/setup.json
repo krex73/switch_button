@@ -1,0 +1,23 @@
+{
+    "thisSensorMode" : false,
+    "sensorPin" : 5,
+    "controlPin" : 6,
+    "ledPin" : 7,
+
+    "enableMQTT" : 1,
+    "mqttPort" : 1883,
+    "mqttServer" : "broker.hivemq.com",
+    "mqttUser" : "",
+    "mqttPassword" : "",
+    "mqttPrefix" : "DH1B5SPElVc31fceizy5n8g40B8SLXUCyNGTqzgDOkcJ7T7y8Z",
+
+    "controlSSDPName" : "control_1",
+    "sensorSSDPName" : "sensor_1",
+    "interval" : 10,
+    "changePort" : 8888,
+    "ssid" :"SV",
+    "pass" :"Sv123654789",
+    "pass_td" :"123654789",
+    "ftp_name" : "ftp",
+    "ftp_password" : "ftp"
+}
