@@ -22,7 +22,6 @@ void initUDP()
 
 void sendUDP(String ustr)
 {
-    if()
     Udp.beginPacket(ip_udp, port_udp);
     Udp.write(ustr.c_str());
 }

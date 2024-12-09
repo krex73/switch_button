@@ -1,3 +1,4 @@
+#pragma once
 #include "udp_util.h"
 #include "config.hpp"
 

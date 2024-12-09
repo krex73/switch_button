@@ -12,6 +12,8 @@
 #include "wifi_setup.hpp"
 #include "interface.hpp"
 #include <ArduinoJson.h>
+#include "DallasTemperature.h"
+#include "sensor.h"
 
 FTPServer ftpSrv(LittleFS);
 SimpleTimer Timer;
@@ -83,16 +85,7 @@ void loop()
   handleUDP();
   if (config.thisSensorMode)
   {
-    bounce->update();
-    if (bounce->changed())
-      if (bounce->read() == HIGH)
-      {
-        sendUDP("open");
-      }
-      else
-      {
-        sendUDP("closed");
-      }
+    doSensorMode();
   }
 else
 {

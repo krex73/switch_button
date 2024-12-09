@@ -1,5 +1,5 @@
 {
-    "thisSensorMode" : false,
+    "thisSensorMode" : true,
     "sensorPin" : 5,
     "controlPin" : 6,
     "ledPin" : 7,
