@@ -1,101 +1,69 @@
 #include "config.hpp"
-#include <GyverPortal.h>
 #include "udp_util.h"
+#include <ESPAsyncWebServer.h>
 #include <FTPServer.h>
 #include <LittleFS.h>
 #include "SimpleTimer.h"
 #include "ArduinoOTA.h"
 #include "ssdp.h"
 #include "log_util.h"
-#include "EspMQTTClient.h"
-#include <Bounce2.h>
 #include "wifi_setup.hpp"
 #include "interface.hpp"
 #include <ArduinoJson.h>
-#include "DallasTemperature.h"
 #include "sensor.h"
+#include "mqtt.h"
+#include "relay.h"
+#include <GyverNTP.h>
 
 FTPServer ftpSrv(LittleFS);
 SimpleTimer Timer;
-bool needUpdate=true;
+bool needUpdate = true;
 
-extern WiFiUDP Udp;
+extern WiFiUDP udp;
 
-Bounce *bounce;
-
-GyverPortal ui(&LittleFS); // для проверки файлов
-EspMQTTClient *client;
+AsyncWebServer server(80);
 
 int i = 0;
-
-void onConnectionEstablished()
-{
-  Serial.println("connected");
-  client->subscribe(config.mqttPrefix + "/power_state", [](const String &payload)
-                    { Serial.println("Command On"); });
-  // client->publish(config.mqttPrefix + "/temperature", "15");
-}
 
 // конструктор страницы
 void setup()
 {
   Serial.begin(115200);
-
   LittleFS.begin();
   loadConfig();
 
+  delay(4200);
+#ifdef ISRELEY
+  initRelayMode();
+#else
+  initSensorMode();
+#endif
   WifiInit();
-
-  Udp.begin(config.changePort);
+  NTP.setHost("192.168.7.247");
+  NTP.begin(3);
   initUDP();
+  SSDP_init();
+  httpInit();
+  server.begin();
 
   ftpSrv.begin(config.ftp_name, config.ftp_password); // username, password for ftp.  set ports in ESP8266FtpServer.h  (default 21, 50009 for PASV)
-  if (config.enableMQTT)
-  {
-    Serial.print((config.mqttPrefix + "userKrex").c_str());
-    client = new EspMQTTClient(config.mqttServer.c_str(), config.mqttPort, config.mqttUser.c_str(), config.mqttPassword.c_str(), "userKrex238");
-    // config.mqttUser.c_str()
-    client->enableDebuggingMessages(true);
-  };
+  mqttInit();
+  Timer.setInterval(60000, checkWiFiAndReset);
+  
+  //Timer.setInterval(60000, );
 
-  Timer.setInterval(300000, reset_device);
-  // Только для блока управления
-  if (!config.thisSensorMode)
-  {
-    requestSSDP();
-    Timer.setInterval(60000, requestSSDP);
-  }
-  else
-  {
-    bounce = new Bounce();
-    pinMode(config.sensorPin, INPUT_PULLUP);
-    bounce->attach(config.sensorPin);
-  };
 
-  // подключаем конструктор и запускаем
-  ui.attachBuild(build);
-  ui.attach(action);
-  ui.start(((config.thisSensorMode) ? config.sensorSSDPName : config.controlSSDPName).c_str());
   ArduinoOTA.begin();
-  SSDP_init();
 }
 
 void loop()
 {
+  NTP.tick();
   handleUDP();
-  if (config.thisSensorMode)
-  {
-    doSensorMode();
-  }
-else
-{
-  handleSSDP();
-};
-Timer.run();
-ftpSrv.handleFTP();
-ui.tick();
-ArduinoOTA.handle();
-handleSSDP();
-if (config.enableMQTT)
-  client->loop();
+#ifndef ISRELEY
+  doSensorMode();
+#endif
+  Timer.run();
+  ftpSrv.handleFTP();
+  ArduinoOTA.handle();
 }

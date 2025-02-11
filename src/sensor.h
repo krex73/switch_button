@@ -1,15 +1,41 @@
 #pragma once
+#ifndef ISRELEY
 #include "udp_util.h"
-#include <Bounce2.h>
 #include <ESP8266WiFi.h>
-extern Bounce *bounce;
+#include "AsyncMqttClient.h"
+#include "Bounce2.h"
+
+
+Bounce * bounce;
+
+extern SimpleTimer Timer;
+extern AsyncMqttClient *mqttClient;
+
+void sendState()
+{
+    if(mqttClient->connected()){
+        mqttClient->publish((config.mqttPrefix+"/"+config.topicName).c_str(),0,true, (const char*)(bounce->read() == HIGH ? "open" : "closed"));
+    }
+}
 
 void doSensorMode()
 {
     bounce->update();
-    if (WiFi.status() != WL_CONNECTED)
+    if (bounce->changed())
     {
-        if (bounce->changed())
-             sendUDP(bounce->read() == HIGH ? "open":"closed");
+        sendState();
     }
 }
+
+void initSensorMode()
+{
+    pinMode(config.sensorPin, INPUT_PULLUP);
+    bounce = new Bounce();
+    bounce->attach(config.sensorPin);
+
+    pinMode(config.sensorStateLEDPin, OUTPUT);
+    digitalWrite(config.sensorStateLEDPin, LOW);
+
+    Timer.setInterval(config.sensorSendInterval, sendState);
+}
+#endif

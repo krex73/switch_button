@@ -1,6 +1,18 @@
 #ifndef _str_util_h
 #define _str_util_h
 
+
+// void del_char(const char * src, char c)
+// {
+// char *tmp = src;
+// do
+// if (*src != c)
+// *res++ = *src;
+// while (*src++);
+// return tmp;
+// }
+
+
 bool split2(const String &s, String &name, String &val)
 {
   int i;

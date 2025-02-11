@@ -1,0 +1,34 @@
+{
+    "thisSensorMode" : false,
+    "esp01" : true,
+    
+    "sensorPin" : 1,
+    "WifiSTAPin": 2,
+    "sensorStateLEDPin" : 0,
+    "enableIntervalPolling" : true,
+    "sensorSendInterval" : 60000,
+    "pingHost" : "192.168.7.247",
+
+    "udpServer" : "192.168.7.247",
+    "udpPort" : 8888,
+
+    "controlPin" : 2,
+
+    "enableMQTT" : 1,
+    "mqttPort" : 1883,
+    "mqttServer" : "192.168.7.247",
+    "mqttUser" : "",
+    "mqttPassword" : "",
+    "mqttPrefix" : "device/work",
+    "topicName" : "sensor_1",
+
+    "SSDPName" : "relay_1",
+    "interval" : 10,
+    "changePort" : 8888,
+    "ssid" :"ESP",
+    "pass" :"123654789",
+    "ssid_td" :"RELE01",
+    "pass_td" :"123654789",
+    "ftp_name" : "ftp",
+    "ftp_password" : "ftp"
+}

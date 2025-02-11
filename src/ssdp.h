@@ -1,30 +1,33 @@
-#include <ESP8266SSDP.h>
-#include <GyverPortal.h>
+//#include <ESP8266SSDP.h>
 #include "config.hpp"
-
-extern GyverPortal ui;
+#include "../lib/AsyncSSDP/AsyncSSDP.h"
 
 WiFiUDP Udp2;
+extern AsyncWebServer server;
 
 void SSDP_init(void)
 {
   // SSDP дескриптор
-  ui.server.on("/description.xml", HTTP_GET, []()
-               { SSDP.schema(ui.server.client()); });
+  server.on("/description.xml", HTTP_GET, [](AsyncWebServerRequest *request)
+            { request->send(LittleFS, "/description.xml", "text/xml"); });
+
+            
   // Если версия  2.0.0 закаментируйте следующую строчку
   SSDP.setDeviceType("upnp:rootdevice");
   SSDP.setSchemaURL("description.xml");
   SSDP.setHTTPPort(80);
-  SSDP.setName((config.thisSensorMode) ? config.sensorSSDPName : config.controlSSDPName);
+  SSDP.setName(config.SSDPName);
   SSDP.setSerialNumber("001788102201");
   SSDP.setURL("/");
-  SSDP.setModelName((config.thisSensorMode) ? config.sensorSSDPName : config.controlSSDPName);
+  SSDP.setModelName(config.SSDPName);
   SSDP.setModelNumber("001");
   SSDP.setModelURL("");
   SSDP.setManufacturer("Krex");
   SSDP.setManufacturerURL("");
+  SSDP.updateSchemaFile();
   SSDP.begin();
-  Udp2.begin(1901);
+ 
+  //Udp2.begin(1901);
 }
 void requestSSDP()
 { 
@@ -67,7 +70,7 @@ void handleSSDP()
       int len = Udp2.read(packetBuffer, 512);
       if (len > 0) packetBuffer[len] = 0;
       input_string += packetBuffer;
-      int i = input_string.indexOf(config.sensorSSDPName);
+      int i = input_string.indexOf(config.SSDPName);
       //Serial.println(packetBuffer);
 //    Если нашли кнопку
       if (i > 0){
